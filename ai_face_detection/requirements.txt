@@ -1,0 +1,7 @@
+tensorflow==2.15.1
+matplotlib
+tensorflow_datasets
+pydot-ng
+pillow
+protobuf>=4.21.6
+opencv-python-headless
