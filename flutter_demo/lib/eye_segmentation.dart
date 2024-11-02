@@ -18,7 +18,8 @@ class EyeSegmentationScreen extends StatefulWidget {
 }
 
 class _EyeSegmentationState extends State<EyeSegmentationScreen> {
-  static const imageSize = 96;
+  static const imageSizeFace = 96;
+  static const imageSizeEyeSegmentation = 48;
   var _frameCounter = 0;
   Interpreter? _faceDetectionInterpreter;
   Interpreter? _eyeSegmentationInterpreter;
@@ -28,6 +29,7 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
   List<EyeSegment> _eyeSegments = [];
   var _showBoundingBox = true;
   ui.Image? _sombrero;
+  ui.Image? _glasses;
   final _timings = Timings();
 
   _EyeSegmentationState() {
@@ -43,6 +45,7 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
 
   Future<void> _initializeProps() async {
     _sombrero = await loadUiImage('assets/images/sombrero.png');
+    _glasses = await loadUiImage('assets/images/glasses.png');
   }
 
   Future<ui.Image> loadUiImage(String assetPath) async {
@@ -81,9 +84,10 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
       return;
     }
     _timings.start = DateTime.now();
-    final imageConverted = _convertImage(image);
+    final imageConverted = _convertImage(image, imageSizeFace);
     _timings.imageConversion = DateTime.now();
     final inputImageDetection = _preProcessImage(imageConverted);
+    _timings.imageProcessing = DateTime.now();
     final inputDetection = inputImageDetection.buffer.asFloat32List();
     var inputShapeDetection = _faceDetectionInterpreter!.getInputTensor(0).shape;
     if (inputShapeDetection.length != 4 || inputShapeDetection[0] != 1) {
@@ -91,7 +95,6 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
     }
     final inputTensorDetection = inputDetection.reshape([1, inputShapeDetection[1], inputShapeDetection[2], inputShapeDetection[3]]);
     var outputDetection = List.filled(_faceDetectionInterpreter!.getOutputTensor(0).shape[1], 0).reshape([1, 4]);
-    _timings.imageProcessing = DateTime.now();
     try {
       _faceDetectionInterpreter!.run(inputTensorDetection, outputDetection);
     } catch (e) {
@@ -101,10 +104,10 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
     _timings.faceDetection = DateTime.now();
     _detectionResult = outputDetection[0];
     final faceLocation = [
-      min<double>(outputDetection[0][0], outputDetection[0][2]) * imageSize,
-      min<double>(outputDetection[0][1], outputDetection[0][3]) * imageSize,
-      max<double>(outputDetection[0][0], outputDetection[0][2]) * imageSize,
-      max<double>(outputDetection[0][1], outputDetection[0][3]) * imageSize,
+      min<double>(outputDetection[0][0], outputDetection[0][2]) * imageSizeFace,
+      min<double>(outputDetection[0][1], outputDetection[0][3]) * imageSizeFace,
+      max<double>(outputDetection[0][0], outputDetection[0][2]) * imageSizeFace,
+      max<double>(outputDetection[0][1], outputDetection[0][3]) * imageSizeFace,
     ];
     final faceImage = img.copyCrop(
       imageConverted,
@@ -114,7 +117,7 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
       height: faceLocation[3].toInt() - faceLocation[1].toInt(),
     );
     if (faceImage.width == 0 || faceImage.height == 0) return;
-    final resizedFaceImage = img.copyResize(faceImage, width: imageSize, height: imageSize);
+    final resizedFaceImage = img.copyResize(faceImage, width: imageSizeEyeSegmentation, height: imageSizeEyeSegmentation);
     final inputFaceImage = _preProcessImage(resizedFaceImage);
     final inputTensorSegmentation = inputFaceImage.buffer.asFloat32List();
     var inputShapeSegmentation = _eyeSegmentationInterpreter!.getInputTensor(0).shape;
@@ -122,7 +125,7 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
       throw StateError("Model expects a 4D input tensor with batch size 1.");
     }
     final inputTensorSegmentationReshaped = inputTensorSegmentation.reshape([1, inputShapeSegmentation[1], inputShapeSegmentation[2], inputShapeSegmentation[3]]);
-    var outputSegmentation = List.filled(imageSize * imageSize * 2, 0).reshape([1, imageSize, imageSize, 2]);
+    var outputSegmentation = List.filled(imageSizeEyeSegmentation * imageSizeEyeSegmentation * 2, 0).reshape([1, imageSizeEyeSegmentation, imageSizeEyeSegmentation, 2]);
     _timings.cuttingAndProcessing = DateTime.now();
     try {
       _eyeSegmentationInterpreter!.run(inputTensorSegmentationReshaped, outputSegmentation);
@@ -132,9 +135,9 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
     }
     _timings.eyeSegmentation = DateTime.now();
     final eyeSegmentation = List.generate(
-      imageSize,
+      imageSizeEyeSegmentation,
       (y) => List.generate(
-        imageSize,
+        imageSizeEyeSegmentation,
         (x) {
           // Select the class with the highest probability (0: background, 1: eye)
           return outputSegmentation[0][y][x][1] > outputSegmentation[0][y][x][0] ? 1 : 0;
@@ -143,10 +146,10 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
     );
     _eyeSegments = findEyeSegments(
       eyeSegmentation,
-      faceLocation[0] / imageSize,
-      faceLocation[1] / imageSize,
-      (faceLocation[2] - faceLocation[0]) / imageSize,
-      (faceLocation[3] - faceLocation[1]) / imageSize,
+      faceLocation[0] / imageSizeFace,
+      faceLocation[1] / imageSizeFace,
+      (faceLocation[2] - faceLocation[0]) / imageSizeFace,
+      (faceLocation[3] - faceLocation[1]) / imageSizeFace,
     );
     _timings.postProcessing = DateTime.now();
   }
@@ -159,53 +162,53 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
     double faceScaleY,
   ) {
     List<EyeSegment> eyeSegments = [];
-
-    // Loop through the binary mask and find clusters of pixels
-    for (var y = 0; y < imageSize; y++) {
-      for (var x = 0; x < imageSize; x++) {
+    for (var y = 0; y < imageSizeEyeSegmentation; y++) {
+      for (var x = 0; x < imageSizeEyeSegmentation; x++) {
         if (eyeSegmentation[y][x] == 1) {
           List<List<int>> eyeRegion = getEyeRegion(y, x, eyeSegmentation);
           if (eyeRegion.isNotEmpty) {
             int sumX = eyeRegion.map((p) => p[0]).reduce((a, b) => a + b);
             int sumY = eyeRegion.map((p) => p[1]).reduce((a, b) => a + b);
             int count = eyeRegion.length;
-            var mask = List.generate(imageSize, (y) => List.generate(imageSize, (x) => 0));
-            for (var pixel in eyeRegion) {
-              mask[pixel[1]][pixel[0]] = 1;
-            }
             eyeSegments.add(EyeSegment(
-              x: sumX / count / imageSize * faceScaleX + faceLocationX,
-              y: sumY / count / imageSize * faceScaleY + faceLocationY,
-              pixels: eyeRegion,
+              x: sumX / count / imageSizeEyeSegmentation * faceScaleX + faceLocationX,
+              y: sumY / count / imageSizeEyeSegmentation * faceScaleY + faceLocationY,
+              pixels: eyeRegion.map((p) => [p[0].toDouble(), p[1].toDouble()]).toList(),
             ));
           }
         }
       }
     }
-
-    return eyeSegments;
+    eyeSegments.sort((a, b) => b.amountOfPixels.compareTo(a.amountOfPixels));
+    final eyeSegmentsFiltered = <EyeSegment>[];
+    for (var i = 0; i < eyeSegments.length; i++) {
+      if (eyeSegmentsFiltered.any((e) => e.x == eyeSegments[i].x && e.y == eyeSegments[i].y)) {
+        continue;
+      }
+      eyeSegments[i].pixels = eyeSegments[i]
+          .pixels
+          .map((p) => [
+                p[0] / imageSizeEyeSegmentation * faceScaleX + faceLocationX,
+                p[1] / imageSizeEyeSegmentation * faceScaleY + faceLocationY,
+              ])
+          .toList();
+      eyeSegmentsFiltered.add(eyeSegments[i]);
+      if (eyeSegmentsFiltered.length >= 2) {
+        break;
+      }
+    }
+    return eyeSegmentsFiltered;
   }
 
   List<List<int>> getEyeRegion(int startY, int startX, List<List<int>> eyeSegmentation) {
-    // Dimensions of the image
     int imageSize = eyeSegmentation.length;
-
-    // List to store the pixels belonging to the current eye region
     List<List<int>> eyeRegion = [];
-
-    // Check if the starting pixel is part of an eye region
     if (eyeSegmentation[startY][startX] == 0) {
-      return eyeRegion; // Return empty if the starting point is not an eye pixel
+      return eyeRegion;
     }
-
-    // A queue for flood-fill algorithm (BFS)
     Queue<List<int>> queue = Queue();
     queue.add([startY, startX]);
-
-    // Set to keep track of visited pixels
     Set<String> visited = {};
-
-    // Directions for moving in 4-connected neighbors (up, down, left, right)
     List<List<int>> directions = [
       [-1, 0], // Up
       [1, 0], // Down
@@ -251,7 +254,7 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
     return normalizedBytes;
   }
 
-  img.Image _convertImage(CameraImage cameraImage) {
+  img.Image _convertImage(CameraImage cameraImage, int imageSize) {
     final width = cameraImage.width;
     final height = cameraImage.height;
     final imgImage = img.Image(width: width, height: height);
@@ -322,20 +325,20 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
                         ),
                       ),
                     ),
-                    for (var eyeSegment in _eyeSegments) ...[
-                      Positioned(
-                        left: eyeSegment.x * constraints.maxWidth,
-                        top: eyeSegment.y * constraints.maxHeight,
-                        child: Container(
-                          width: 10,
-                          height: 10,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: EyesPainter(
+                          eyeSegments: _eyeSegments,
+                          showBoundingBox: _showBoundingBox,
+                          glasses: _glasses,
+                          imageSizeFace: imageSizeFace,
+                          faceLocationTopLeft: Offset(
+                            min<double>(_detectionResult![0], _detectionResult![2]),
+                            min<double>(_detectionResult![1], _detectionResult![3]),
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   ],
                 ],
               ),
@@ -413,16 +416,88 @@ class BoundingBoxPainter extends CustomPainter {
   bool shouldRepaint(BoundingBoxPainter oldDelegate) => true;
 }
 
+class EyesPainter extends CustomPainter {
+  final List<EyeSegment> eyeSegments;
+  final bool showBoundingBox;
+  final ui.Image? glasses;
+  final int imageSizeFace;
+  final Offset faceLocationTopLeft;
+
+  EyesPainter({
+    required this.eyeSegments,
+    required this.showBoundingBox,
+    required this.glasses,
+    required this.imageSizeFace,
+    required this.faceLocationTopLeft,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (showBoundingBox) {
+      final paint = Paint()
+        ..color = Colors.blue
+        ..style = PaintingStyle.fill;
+      for (var eyeSegment in eyeSegments) {
+        canvas.drawCircle(Offset(eyeSegment.x * size.width, eyeSegment.y * size.height), 4, paint);
+      }
+    } else {
+      if (glasses == null || eyeSegments.length != 2) return;
+      final width = (eyeSegments[1].x * size.width - eyeSegments[0].x * size.width).abs() * 2;
+      final height = width * glasses!.height / glasses!.width;
+      var angle = atan2(
+        (eyeSegments[1].y - eyeSegments[0].y) * size.height,
+        (eyeSegments[1].x - eyeSegments[0].x) * size.width,
+      );
+
+      if (angle > pi / 2) {
+        angle -= pi;
+      } else if (angle < -pi / 2) {
+        angle += pi;
+      }
+
+      final centerX = (eyeSegments[0].x + eyeSegments[1].x) / 2 * size.width;
+      final centerY = (eyeSegments[0].y + eyeSegments[1].y) / 2 * size.height;
+      canvas.save();
+      canvas.translate(centerX, centerY);
+      canvas.rotate(angle);
+      canvas.drawImageRect(
+        glasses!,
+        Rect.fromLTWH(0, 0, glasses!.width.toDouble(), glasses!.height.toDouble()),
+        Rect.fromLTWH(-width / 2, -height / 2, width, height),
+        Paint(),
+      );
+      canvas.restore();
+      // final pixels = [...eyeSegments.first.pixels, ...eyeSegments.last.pixels];
+      // final paint = Paint()
+      //   ..color = Colors.red.withOpacity(0.5)
+      //   ..style = PaintingStyle.fill;
+      // for (var pixel in pixels) {
+      //   canvas.drawCircle(
+      //     Offset(pixel[0] * size.width, pixel[1] * size.height),
+      //     1 / imageSizeFace * max(size.width, size.height),
+      //     paint,
+      //   );
+      // }
+    }
+  }
+
+  @override
+  bool shouldRepaint(EyesPainter oldDelegate) => true;
+}
+
 class EyeSegment {
   final double x;
   final double y;
-  final List<List<int>> pixels;
+  List<List<double>> pixels;
+  late final int amountOfPixels;
 
   EyeSegment({
     required this.x,
     required this.y,
     required this.pixels,
-  });
+  }) {
+    amountOfPixels = pixels.length;
+  }
 }
 
 class Timings {
