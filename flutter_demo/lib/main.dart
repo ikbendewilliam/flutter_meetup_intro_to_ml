@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/color_recognizer.dart';
+import 'package:flutter_demo/eye_segmentation.dart';
 import 'package:flutter_demo/face_detection.dart';
 
 void main() {
@@ -47,6 +48,10 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const FaceDetectionScreen())),
               child: const Text('Face Detection'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const EyeSegmentationScreen())),
+              child: const Text('Eye segmentation'),
             ),
           ],
         ),
