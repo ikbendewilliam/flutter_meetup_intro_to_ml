@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -8,6 +9,9 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
 class EyeSegmentationScreen extends StatefulWidget {
@@ -24,6 +28,7 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
   Interpreter? _faceDetectionInterpreter;
   Interpreter? _eyeSegmentationInterpreter;
   CameraController? _cameraController;
+  List<CameraDescription> _cameras = [];
   bool _isDetecting = false;
   List<double>? _detectionResult;
   List<EyeSegment> _eyeSegments = [];
@@ -31,6 +36,7 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
   ui.Image? _sombrero;
   ui.Image? _glasses;
   final _timings = Timings();
+  final _screenshotController = ScreenshotController();
 
   _EyeSegmentationState() {
     _initInterpreters();
@@ -56,27 +62,56 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
     return completer.future;
   }
 
-  void _initializeCamera() async {
-    final cameras = await availableCameras();
+  Future<void> _initializeCamera() async {
+    _cameras = await availableCameras();
     _cameraController = CameraController(
-      cameras.firstWhere((e) => e.lensDirection == CameraLensDirection.front),
+      _cameras.firstWhere((e) => e.lensDirection == CameraLensDirection.front),
       ResolutionPreset.low,
     );
     await _cameraController?.initialize();
-
     if (!mounted) return;
     setState(() {});
+    _startListeningForCameraUpdates();
+  }
+
+  Future<void> _startListeningForCameraUpdates() async {
+    await _cameraController?.initialize();
 
     _cameraController?.startImageStream((CameraImage image) async {
-      if (_isDetecting) return;
+      if (!mounted || _isDetecting) return;
       _frameCounter++;
       if (_frameCounter % 2 != 0) return;
       _frameCounter = 0;
       _isDetecting = true;
       await _runModelsOnFrame(image);
+      if (!mounted) return;
       setState(() {});
       _isDetecting = false;
     });
+  }
+
+  Future<void> _stopListeningForCameraUpdates() async {
+    _cameraController?.stopImageStream();
+  }
+
+  Future<void> _takePicture() async {
+    try {
+      final image = await _screenshotController.capture(
+        delay: const Duration(milliseconds: 1),
+        pixelRatio: MediaQuery.of(context).devicePixelRatio,
+      );
+      if (image == null) return;
+      final directory = await getApplicationDocumentsDirectory();
+      final imagePath = await File('${directory.path}/${Random().nextDouble().toString().split('.').last}.png').create();
+      await imagePath.writeAsBytes(image);
+      await Share.shareXFiles([XFile(imagePath.path)]);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Image saved to ${imagePath.path}'),
+      ));
+    } catch (e) {
+      print('Error taking picture: $e');
+    }
   }
 
   Future<void> _runModelsOnFrame(CameraImage image) async {
@@ -302,46 +337,44 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
     return Scaffold(
       body: Column(
         children: [
-          AspectRatio(
-            aspectRatio: 1 / (_cameraController?.value.aspectRatio ?? 1),
-            child: LayoutBuilder(
-              builder: (context, constraints) => Stack(
-                children: [
-                  if (_cameraController != null && _cameraController!.value.isInitialized)
-                    CameraPreview(
-                      _cameraController!,
+          Screenshot(
+            controller: _screenshotController,
+            child: Stack(
+              children: [
+                if (_cameraController != null && _cameraController!.value.isInitialized)
+                  CameraPreview(
+                    _cameraController!,
+                  ),
+                if (_faceDetectionInterpreter == null || _eyeSegmentationInterpreter == null) ...[
+                  const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ] else if (_detectionResult != null) ...[
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: BoundingBoxPainter(
+                        _detectionResult!,
+                        showBoundingBox: _showBoundingBox,
+                        sombrero: _sombrero,
+                      ),
                     ),
-                  if (_faceDetectionInterpreter == null || _eyeSegmentationInterpreter == null) ...[
-                    const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ] else if (_detectionResult != null) ...[
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: BoundingBoxPainter(
-                          _detectionResult!,
-                          showBoundingBox: _showBoundingBox,
-                          sombrero: _sombrero,
+                  ),
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: EyesPainter(
+                        eyeSegments: _eyeSegments,
+                        showBoundingBox: _showBoundingBox,
+                        glasses: _glasses,
+                        imageSizeFace: imageSizeFace,
+                        faceLocationTopLeft: Offset(
+                          min<double>(_detectionResult![0], _detectionResult![2]),
+                          min<double>(_detectionResult![1], _detectionResult![3]),
                         ),
                       ),
                     ),
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: EyesPainter(
-                          eyeSegments: _eyeSegments,
-                          showBoundingBox: _showBoundingBox,
-                          glasses: _glasses,
-                          imageSizeFace: imageSizeFace,
-                          faceLocationTopLeft: Offset(
-                            min<double>(_detectionResult![0], _detectionResult![2]),
-                            min<double>(_detectionResult![1], _detectionResult![3]),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
           const SizedBox(height: 16),
@@ -357,6 +390,25 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
                 const Text('Show bounding box'),
               ],
             ),
+          ),
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  await _stopListeningForCameraUpdates();
+                  await _cameraController?.setDescription(_cameraController?.description == null || _cameraController?.description.lensDirection == CameraLensDirection.front
+                      ? _cameras.firstWhere((e) => e.lensDirection == CameraLensDirection.back)
+                      : _cameras.firstWhere((e) => e.lensDirection == CameraLensDirection.front));
+                  _startListeningForCameraUpdates();
+                },
+                child: Text('Switch camera (${_cameraController?.description.name})'),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: _takePicture,
+                child: const Text('Take picture'),
+              ),
+            ],
           ),
           ..._timings.timings.entries.map((entry) {
             return Container(
