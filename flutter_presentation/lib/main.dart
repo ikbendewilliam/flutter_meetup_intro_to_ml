@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.light,
       speakerInfo: const FlutterDeckSpeakerInfo(
         name: 'William Verhaeghe',
-        description: 'Flutter lead at icapps',
+        description: 'Flutter lead and AI Domain lead at icapps',
         socialHandle: '',
         imagePath: 'assets/images/me.png',
       ),

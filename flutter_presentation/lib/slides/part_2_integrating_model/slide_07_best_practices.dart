@@ -13,30 +13,19 @@ class P2S07BestPractices extends FlutterDeckSlideWidget {
 
   @override
   FlutterDeckSlide build(BuildContext context) {
-    return FlutterDeckSlide.split(
+    return FlutterDeckSlide.blank(
       theme: Themes.lightTheme,
-      leftBuilder: (context) => const BulletList(
+      builder: (context) => const BulletList(
         lightTheme: true,
-        title: 'Field()',
+        title: 'Best practices for Machine Learning in Mobile Apps',
         items: [
-          'Creates a field',
-          'Specify name, type, annotations and body',
+          'Keeping Models Lightweight',
+          'User Privacy & On-Device Inference',
+          'Real-time vs Batch Inference',
+          'Security?',
+          'Use existing models/plugins',
+          'Not everything should use Machine Learning!',
         ],
-      ),
-      rightBuilder: (context) => Theme(
-        data: ThemeData.light(),
-        child: const FlutterDeckCodeHighlight(
-          fileName: 'class.dart',
-          code: """Field(
-  (b) => b
-    ..name = CaseUtil(entry.key).camelCase
-    ..static = true
-    ..modifier = FieldModifier.constant
-    ..assignment = Code(
-        "'\${entry.key.startsWith('/') ? '' : '/'}\${entry.value ? entry.key : CaseUtil(entry.key, removeSuffixes: removeSuffixes).textWithoutSuffix}'"),
-)
-""",
-        ),
       ),
     );
   }

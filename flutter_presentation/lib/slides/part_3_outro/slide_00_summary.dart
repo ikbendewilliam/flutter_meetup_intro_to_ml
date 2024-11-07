@@ -13,17 +13,32 @@ class P3S00Summary extends FlutterDeckSlideWidget {
 
   @override
   FlutterDeckSlide build(BuildContext context) {
-    return FlutterDeckSlide.blank(
-      theme: Themes.lightTheme,
-      builder: (context) => const Center(
+    return FlutterDeckSlide.split(
+      theme: Themes.darkTheme,
+      leftBuilder: (context) => const Center(
+        child: BulletList(
+          title: 'Develop',
+          items: [
+            '0.   Installing Required Libraries',
+            '1.   Load and validate dataset',
+            '2.   Create and compile model',
+            '3.   Train the model',
+            '4.   Evaluate history',
+            '5.   Manually evaluate model',
+            '6.   Save model',
+          ],
+        ),
+      ),
+      rightBuilder: (context) => const Center(
         child: BulletList(
           lightTheme: true,
-          title: 'Types of generation',
+          title: 'Integrate',
           items: [
-            'Copilot',
-            'File().write()',
-            'build_runner',
-            'build_runner multiple files',
+            '7.   Installing Required Libraries (tflite_flutter)',
+            '8.   Load model',
+            '9.   Preprocess input',
+            '10.  Run inference',
+            '11.  Handle output',
           ],
         ),
       ),

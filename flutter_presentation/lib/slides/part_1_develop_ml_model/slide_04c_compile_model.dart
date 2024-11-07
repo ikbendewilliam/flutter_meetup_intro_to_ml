@@ -26,18 +26,25 @@ class P1S04cCompileModel extends FlutterDeckSlideWidget {
           ],
         ),
       ),
-      rightBuilder: (context) => Theme(
-        data: ThemeData.dark(),
-        child: const FlutterDeckCodeHighlight(
-          fileName: 'color_recognizer.py',
-          code: '''
-model = create_classification_model()
-optimizer = Adam(learning_rate=learning_rate)
-model.compile(optimizer=optimizer,
-              loss=CategoricalCrossentropy(),
-              metrics='mse')
-            ''',
-        ),
+      rightBuilder: (context) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Theme(
+            data: ThemeData.dark(),
+            child: const FlutterDeckCodeHighlight(
+              fileName: 'color_recognizer.py',
+              code: '''
+          model = create_classification_model()
+          optimizer = Adam(learning_rate=learning_rate)
+          model.compile(optimizer=optimizer,
+                  loss=CategoricalCrossentropy(),
+                  metrics='mse')
+                ''',
+            ),
+          ),
+          const SizedBox(height: 32),
+          Image.asset('assets/images/gradient_descent.webp'),
+        ],
       ),
     );
   }

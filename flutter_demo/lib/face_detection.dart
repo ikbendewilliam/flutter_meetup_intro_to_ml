@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
@@ -80,7 +80,9 @@ class _FaceDetectionState extends State<FaceDetectionScreen> {
     try {
       _interpreter!.run(inputTensor, output);
     } catch (e) {
-      print("Error during inference: $e");
+      if (kDebugMode) {
+        print("Error during inference: $e");
+      }
       rethrow;
     }
     return output;

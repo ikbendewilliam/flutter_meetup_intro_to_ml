@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
@@ -110,7 +110,9 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
         content: Text('Image saved to ${imagePath.path}'),
       ));
     } catch (e) {
-      print('Error taking picture: $e');
+      if (kDebugMode) {
+        print('Error taking picture: $e');
+      }
     }
   }
 
@@ -133,7 +135,9 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
     try {
       _faceDetectionInterpreter!.run(inputTensorDetection, outputDetection);
     } catch (e) {
-      print("Error during inference face detection: $e");
+      if (kDebugMode) {
+        print("Error during inference face detection: $e");
+      }
       rethrow;
     }
     _timings.faceDetection = DateTime.now();
@@ -165,7 +169,9 @@ class _EyeSegmentationState extends State<EyeSegmentationScreen> {
     try {
       _eyeSegmentationInterpreter!.run(inputTensorSegmentationReshaped, outputSegmentation);
     } catch (e) {
-      print("Error during inference eye segmentation: $e");
+      if (kDebugMode) {
+        print("Error during inference eye segmentation: $e");
+      }
       rethrow;
     }
     _timings.eyeSegmentation = DateTime.now();

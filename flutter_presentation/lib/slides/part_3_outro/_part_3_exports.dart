@@ -1,6 +1,6 @@
 import 'package:flutter_deck/flutter_deck.dart';
 import 'package:flutter_presentation/slides/part_3_outro/slide_00_summary.dart';
-import 'package:flutter_presentation/slides/part_3_outro/slide_02_questions.dart';
+import 'package:flutter_presentation/slides/part_3_outro/slide_01_questions.dart';
 import 'package:flutter_presentation/slides/part_3_outro/slide_99_last.dart';
 
 List<FlutterDeckSlideWidget> slidesPart3 = [

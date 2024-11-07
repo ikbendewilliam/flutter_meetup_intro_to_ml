@@ -14,19 +14,21 @@ class LastSlide extends FlutterDeckSlideWidget {
   @override
   FlutterDeckSlide build(BuildContext context) {
     return FlutterDeckSlide.split(
-      theme: Themes.lightTheme,
+      theme: Themes.darkTheme,
       leftBuilder: (context) => const BulletList(
-        lightTheme: true,
         title: 'Packages used/shown',
+        height: 640,
         items: [
-          'flutter_shader_snap',
-          'GitHub copilot',
-          'model_generator',
-          'icapps/flutter-template',
-          'fgen',
-          'json_serializable',
-          'build_runner (dart/build)',
-          'code_builder',
+          'TensorFlow (+ Keras) (Python)',
+          'NumPy (Python)',
+          'Matplotlib (Python)',
+          'Pillow (Python)',
+          'Opencv (Python)',
+          'Venv (Python)',
+          'Jupyter (VS Code plugin)',
+          'camera',
+          'image',
+          'tflite_flutter',
           'flutter_deck (used for presentation)',
         ],
       ),
@@ -40,26 +42,6 @@ class LastSlide extends FlutterDeckSlideWidget {
                 fontSize: 32,
                 color: Colors.white,
               ),
-            ),
-            const SizedBox(height: 32),
-            Row(
-              children: [
-                Image.asset(
-                  'assets/images/pub_dev_snap.png',
-                  height: 200,
-                  width: 200,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(width: 32),
-                const Text(
-                  'flutter_shader_snap',
-                  style: TextStyle(
-                    fontSize: 32,
-                    color: Colors.white,
-                  ),
-                ),
-                const Spacer(),
-              ],
             ),
             const SizedBox(height: 32),
             Row(
@@ -102,6 +84,16 @@ class LastSlide extends FlutterDeckSlideWidget {
               ],
             ),
             const SizedBox(height: 32),
+            const BulletList(
+              height: 300,
+              title: 'Next steps if you\'re interested',
+              items: [
+                'Coursera Machine Learning (Stanford - Andrew Ng)',
+                'Kaggle (Datasets)',
+                'Forums, MOOCS, YouTube, …',
+                'ChatGPT',
+              ],
+            ),
           ],
         ),
       ),

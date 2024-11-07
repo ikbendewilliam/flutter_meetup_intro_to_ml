@@ -14,36 +14,30 @@ class P2S04PreprocessInput extends FlutterDeckSlideWidget {
   @override
   FlutterDeckSlide build(BuildContext context) {
     return FlutterDeckSlide.split(
-      theme: Themes.lightTheme,
       leftBuilder: (context) => const BulletList(
         lightTheme: true,
-        title: '@annotations',
+        title: 'Preprocess data',
         items: [
-          'Find where to generate code',
-          'Receive details about classes/code',
+          'Same preprocessing as done on training data',
         ],
       ),
       rightBuilder: (context) => Theme(
         data: ThemeData.light(),
         child: const FlutterDeckCodeHighlight(
-          fileName: 'result.dart',
-          code: """const TypeChecker _flutterRouteAnnotationChecker = TypeChecker.fromRuntime(FlutterRoute);
+          fileName: 'color_demo.dart',
+          code: """
+double red = 0;
+double green = 0;
+double blue = 0;
 ...
-  List<RouteConfig> resolve(ClassElement classElement) {
-    final flutterRouteAnnotations = _flutterRouteAnnotationChecker.annotationsOf(classElement, throwOnUnresolved: false);
-    ...
-  }
-...
-  RouteConfig _resolveRoute(ClassElement classElement, DartObject flutterRouteAnnotation) {
-    final flutterRoute = ConstantReader(flutterRouteAnnotation);
-
-    final routeNameValue = flutterRoute.peek('routeName')?.stringValue;
-    final routeName = routeNameValue ?? CaseUtil(classElement.name).kebabCase;
-    final returnType = flutterRoute.peek('returnType')?.typeValue;
-...
+void predict() {
+  final interpreter = _interpreter;
+  if (interpreter == null) return;
+  final input = [red / 255, green / 255, blue / 255];
 """,
         ),
       ),
+      theme: Themes.lightTheme,
     );
   }
 }

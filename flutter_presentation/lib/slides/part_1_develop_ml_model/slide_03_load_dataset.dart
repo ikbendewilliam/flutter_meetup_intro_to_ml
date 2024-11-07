@@ -22,8 +22,9 @@ class P1S03LoadDataset extends FlutterDeckSlideWidget {
           items: [
             'Sources of Datasets (e.g., Kaggle, Custom)',
             'Load images/text/labels/...',
-            'Preprocess (resize, normalize, augment)',
-            'Split data (train/test/validate)',
+            'Preprocess input (resize, normalize, augment)',
+            'Preprocess output (one-hot encode, resize)',
+            'Split data (train/validate/test)',
           ],
         ),
       ),

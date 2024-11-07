@@ -14,34 +14,34 @@ class P2S05RunInference extends FlutterDeckSlideWidget {
   @override
   FlutterDeckSlide build(BuildContext context) {
     return FlutterDeckSlide.split(
-      theme: Themes.lightTheme,
       leftBuilder: (context) => const BulletList(
         lightTheme: true,
-        title: 'Class()',
+        title: 'Run on model',
         items: [
-          'Creates a class',
-          'Specify fields, methods, constructors',
+          'Prepare output buffer',
+          'Run inference',
         ],
       ),
       rightBuilder: (context) => Theme(
         data: ThemeData.light(),
         child: const FlutterDeckCodeHighlight(
-          fileName: 'class.dart',
-          code: """Class(
-  (b) => b
-    ..name = 'RouteNames'
-    ..fields.addAll(
-      routesMap.entries.map(
-        (entry) {
-          return Field(
-            ...
-          );
-        },
-      ),
-    ),
-);""",
+          fileName: 'color_demo.dart',
+          code: """
+double red = 0;
+double green = 0;
+double blue = 0;
+...
+void predict() {
+  final interpreter = _interpreter;
+  if (interpreter == null) return;
+  final input = [red / 255, green / 255, blue / 255];
+  
+  var output = List.filled(_interpreter!.getOutputTensor(0).shape[1], 0).reshape([1, 21]);
+  _interpreter!.run(input, output);
+""",
         ),
       ),
+      theme: Themes.lightTheme,
     );
   }
 }

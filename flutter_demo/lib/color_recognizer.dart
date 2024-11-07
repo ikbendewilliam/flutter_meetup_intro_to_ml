@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
@@ -38,7 +39,9 @@ class _ColorRecognizerScreenState extends State<ColorRecognizerScreen> {
     try {
       _interpreter!.run(input, output);
     } catch (e) {
-      print("Error during inference: $e");
+      if (kDebugMode) {
+        print("Error during inference: $e");
+      }
       rethrow;
     }
     setState(() {

@@ -18,6 +18,7 @@ class P1S02Libraries extends FlutterDeckSlideWidget {
       backgroundBuilder: Themes.darkThemeBackgroundBuilder,
       builder: (context) => const BulletList(
         title: 'Step 0. install required libraries',
+        height: 600,
         items: [
           'TensorFlow (+ Keras) - Everything with models',
           'NumPy - Handle matrices',

@@ -14,9 +14,9 @@ class P2S01Steps extends FlutterDeckSlideWidget {
   @override
   FlutterDeckSlide build(BuildContext context) {
     return FlutterDeckSlide.blank(
-      theme: Themes.darkTheme,
-      backgroundBuilder: Themes.darkThemeBackgroundBuilder,
+      theme: Themes.lightTheme,
       builder: (context) => const BulletList(
+        lightTheme: true,
         title: 'Steps to integrate a model',
         items: [
           '7.   Installing Required Libraries (tflite_flutter)',

@@ -14,30 +14,41 @@ class P2S06HandleOutput extends FlutterDeckSlideWidget {
   @override
   FlutterDeckSlide build(BuildContext context) {
     return FlutterDeckSlide.split(
-      theme: Themes.lightTheme,
       leftBuilder: (context) => const BulletList(
         lightTheme: true,
-        title: 'Method()',
+        title: 'Handle output',
         items: [
-          'Creates a class',
-          'Specify name, return type, body, etc.',
+          'Ouput is a list for each input, a single input means a list of one element',
+          'Result can be a list of probabilities',
+          'Map probabilities to labels',
         ],
       ),
       rightBuilder: (context) => Theme(
         data: ThemeData.light(),
         child: const FlutterDeckCodeHighlight(
-          fileName: 'class.dart',
-          code: """Method(
-  (b) => b
-    ..name = 'goBack'
-    ..lambda = true
-    ..returns = const Reference('void')
-    ..body =
-        const Reference('navigatorKey.currentState?.pop').call([]).code,
-),
+          fileName: 'color_demo.dart',
+          code: """
+double red = 0;
+double green = 0;
+double blue = 0;
+...
+void predict() {
+  final interpreter = _interpreter;
+  if (interpreter == null) return;
+  final input = [red / 255, green / 255, blue / 255];
+  var output = List.filled(_interpreter!.getOutputTensor(0).shape[1], 0).reshape([1, 21]);
+  _interpreter!.run(input, output);
+  
+  setState(() {
+    for (var i = 0; i < output[0].length; i++) {
+      colorsPredictions[colorsPredictions.keys.elementAt(i)] = output[0][i];
+    }
+  });
+}
 """,
         ),
       ),
+      theme: Themes.lightTheme,
     );
   }
 }
