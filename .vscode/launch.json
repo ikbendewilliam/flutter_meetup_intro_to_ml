@@ -8,13 +8,19 @@
             "name": "flutter_demo",
             "cwd": "flutter_demo",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "args": [
+                "--release"
+            ]
         },
         {
             "name": "flutter_presentation",
             "cwd": "flutter_presentation",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "args": [
+                "--release"
+            ]
         }
     ]
 }

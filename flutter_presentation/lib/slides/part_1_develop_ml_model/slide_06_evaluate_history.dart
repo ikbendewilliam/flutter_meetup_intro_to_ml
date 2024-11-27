@@ -26,7 +26,12 @@ class P1S06EvaluateHistory extends FlutterDeckSlideWidget {
           ],
         ),
       ),
-      rightBuilder: (context) => Image.asset('assets/images/history.png'),
+      rightBuilder: (context) => Column(
+        children: [
+          Expanded(child: Image.asset('assets/images/history.png')),
+          Expanded(child: Image.asset('assets/images/history_overfitting.png')),
+        ],
+      ),
     );
   }
 }
