@@ -18,7 +18,7 @@ class P1S04CreateModel extends FlutterDeckSlideWidget {
       splitRatio: const SplitSlideRatio(right: 2),
       leftBuilder: (context) => const Center(
         child: Text(
-          'Define the model',
+          'Step 2. Define the model',
           style: TextStyle(
             fontSize: 48,
             color: Themes.darkThemeTitleColor,

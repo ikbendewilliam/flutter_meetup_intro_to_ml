@@ -18,7 +18,7 @@ class P1S05TrainModel extends FlutterDeckSlideWidget {
       backgroundBuilder: Themes.darkThemeBackgroundBuilder,
       leftBuilder: (context) => const Center(
         child: BulletList(
-          title: 'Run prediction on untrained Model',
+          title: 'Step 3. Train the model',
           items: [
             'batch_size = 16 # How many samples we use for each training step',
             'learning_rate = 0.1 # How fast we learn',

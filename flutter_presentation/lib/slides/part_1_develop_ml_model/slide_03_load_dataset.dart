@@ -18,7 +18,7 @@ class P1S03LoadDataset extends FlutterDeckSlideWidget {
       backgroundBuilder: Themes.darkThemeBackgroundBuilder,
       leftBuilder: (context) => const Center(
         child: BulletList(
-          title: 'Load Dataset',
+          title: 'Step 1. Load Dataset',
           items: [
             'Sources of Datasets (e.g., Kaggle, Custom)',
             'Load images/text/labels/...',

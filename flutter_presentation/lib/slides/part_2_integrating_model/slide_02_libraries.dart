@@ -16,7 +16,7 @@ class P2S02Libraries extends FlutterDeckSlideWidget {
     return FlutterDeckSlide.split(
       leftBuilder: (context) => const BulletList(
         lightTheme: true,
-        title: 'Library: tflite_flutter',
+        title: 'Step 7. Library: tflite_flutter',
         items: [
           'Version is important! 0.10.4 == tf 2.15',
           'Web is not supported',

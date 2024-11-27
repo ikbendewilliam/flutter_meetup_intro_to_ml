@@ -16,7 +16,7 @@ class P2S03LoadModel extends FlutterDeckSlideWidget {
     return FlutterDeckSlide.split(
       leftBuilder: (context) => const BulletList(
         lightTheme: true,
-        title: 'Load model',
+        title: 'Step 8. Load model',
         items: [
           '.tflite file',
           '"Interpreter"',

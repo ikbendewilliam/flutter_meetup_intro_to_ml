@@ -16,7 +16,7 @@ class P2S05RunInference extends FlutterDeckSlideWidget {
     return FlutterDeckSlide.split(
       leftBuilder: (context) => const BulletList(
         lightTheme: true,
-        title: 'Run on model',
+        title: 'Step 10. Run on model',
         items: [
           'Prepare output buffer',
           'Run inference',

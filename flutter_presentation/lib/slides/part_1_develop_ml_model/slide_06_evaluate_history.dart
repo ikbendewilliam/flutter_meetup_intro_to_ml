@@ -18,7 +18,7 @@ class P1S06EvaluateHistory extends FlutterDeckSlideWidget {
       backgroundBuilder: Themes.darkThemeBackgroundBuilder,
       leftBuilder: (context) => const Center(
         child: BulletList(
-          title: 'Evaluate history',
+          title: 'Step 4. Evaluate history',
           items: [
             'Metrics: Accuracy, Loss, Precision, Recall',
             'Check for Overfitting',

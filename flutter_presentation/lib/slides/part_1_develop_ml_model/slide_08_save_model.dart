@@ -18,7 +18,7 @@ class P1S08SaveModel extends FlutterDeckSlideWidget {
       backgroundBuilder: Themes.darkThemeBackgroundBuilder,
       leftBuilder: (context) => const Center(
         child: BulletList(
-          title: 'Save the model',
+          title: 'Step 6. Save the model',
           items: [
             '.keras .h5',
             '.tflite',

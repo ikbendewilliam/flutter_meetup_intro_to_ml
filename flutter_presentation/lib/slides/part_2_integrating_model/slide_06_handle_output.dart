@@ -16,7 +16,7 @@ class P2S06HandleOutput extends FlutterDeckSlideWidget {
     return FlutterDeckSlide.split(
       leftBuilder: (context) => const BulletList(
         lightTheme: true,
-        title: 'Handle output',
+        title: 'Step 11. Handle output',
         items: [
           'Ouput is a list for each input, a single input means a list of one element',
           'Result can be a list of probabilities',

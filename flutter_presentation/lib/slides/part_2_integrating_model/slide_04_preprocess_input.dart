@@ -16,7 +16,7 @@ class P2S04PreprocessInput extends FlutterDeckSlideWidget {
     return FlutterDeckSlide.split(
       leftBuilder: (context) => const BulletList(
         lightTheme: true,
-        title: 'Preprocess data',
+        title: 'Step 9. Preprocess data',
         items: [
           'Same preprocessing as done on training data',
         ],

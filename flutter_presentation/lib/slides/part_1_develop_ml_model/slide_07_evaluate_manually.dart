@@ -20,7 +20,7 @@ class P1S07EvaluateManually extends FlutterDeckSlideWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            'Evaluate manually',
+            'Step 5. Evaluate manually',
             style: TextStyle(
               fontSize: 48,
               color: Themes.darkThemeTitleColor,
