@@ -1,5 +1,7 @@
 # Intro to Machine Learning development and integration in Flutter
 
+https://www.youtube.com/watch?v=k0afb3yEyGo
+
 ## Description
 This project is a simple demonstration of how to integrate a machine learning model in a Flutter application. There are three demos that are trained and a demo app that uses the trained models to make predictions. There is also a presentation for Flutter meetup. The trained models are:
 - Color classifier (very simple model that can be trained in a few seconds)
